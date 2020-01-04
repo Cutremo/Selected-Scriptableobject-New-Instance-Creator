@@ -36,7 +36,6 @@ public class SelectedScriptableobjectNewInstanceCreator : MonoBehaviour
 	{
 		string filePath = AssetDatabase.GetAssetPath(Selection.activeObject);
 
-		Debug.Log(filePath);
 		if (!File.Exists(filePath))
 		{
 			return false;
