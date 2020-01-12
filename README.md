@@ -8,4 +8,4 @@ Allows creating a new instance of a selected ScriptableObject in Unity without h
 
 3-On the asset menu, click Create -> Selected Scriptable Object New Instance.
 
-![](name-of-giphy.gif)
+![](HowToUse.gif)
