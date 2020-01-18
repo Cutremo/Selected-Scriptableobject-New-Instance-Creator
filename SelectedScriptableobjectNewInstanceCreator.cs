@@ -1,10 +1,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using UnityEngine;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.Compilation;
+using UnityEngine;
 using Assembly = System.Reflection.Assembly;
+
 ///<summary>
 ///Repository link: https://github.com/Culoextremo/Selected-Scriptableobject-New-Instance-Creator
 
@@ -24,7 +26,7 @@ using Assembly = System.Reflection.Assembly;
 
 namespace Cutremo
 {
-	public static class SelectedScriptableobjectNewInstanceCreator 
+	public static class SelectedScriptableobjectNewInstanceCreator
 	{
 		[MenuItem("Assets/Create/Selected Scriptableobject New Instance", priority = 1)]
 		private static void CreateAsset()
@@ -50,7 +52,7 @@ namespace Cutremo
 			AssetDatabase.SaveAssets();
 			AssetDatabase.Refresh();
 		}
-		 
+
 		[MenuItem("Assets/Create/Selected Scriptableobject New Instance", validate = true)]
 		private static bool IsSelectedObjectAnScriptableObject()
 		{
@@ -67,33 +69,37 @@ namespace Cutremo
 
 			return fileType != null && fileType.IsSubclassOf(typeof(ScriptableObject)) && !fileType.IsAbstract;
 		}
+
 		private static Type GetScriptType(string fileText, string path)
 		{
-			var delimiters = new string[] { " " };
-			var words = fileText.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+			string namespaceName = null;
+			string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
 
-			var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
+			string[] words = Regex.Split(fileText, @"\s+", RegexOptions.Singleline);
 
 			for (int a = 0; a < words.Length; a++)
 			{
-				if (words[a] == "class" && words[a + 1] == fileNameWithoutExtension)
+				if (words[a] == "namespace")
 				{
-					string fullAssemblyName = CompilationPipeline.GetAssemblyNameFromScriptPath(path);
-					string assemblyName = Path.GetFileNameWithoutExtension(fullAssemblyName);
-
-					Assembly assembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(x => x.GetName().Name == assemblyName);
-
-					Type returnType = null;
-
-					returnType = assembly.GetType(words[a + 1]);
-
-					if (returnType != null)
-					{
-						return returnType;
-					}
+					namespaceName = words[a + 1];
+					break;
 				}
 			}
-			return null;
+			string fullAssemblyName = CompilationPipeline.GetAssemblyNameFromScriptPath(path);
+			string assemblyName = Path.GetFileNameWithoutExtension(fullAssemblyName);
+			Assembly assembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(x => x.GetName().Name == assemblyName);
+
+			string typeName = fileNameWithoutExtension;
+
+			if (namespaceName != null)
+			{
+				typeName = namespaceName + "." + fileNameWithoutExtension;
+			}
+
+			Type returnType = null;
+			returnType = assembly.GetType(typeName);
+
+			return returnType;
 		}
 	}
 }
