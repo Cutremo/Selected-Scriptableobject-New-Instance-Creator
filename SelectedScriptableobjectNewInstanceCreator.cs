@@ -72,9 +72,11 @@ namespace Cutremo
 			var delimiters = new string[] { " " };
 			var words = fileText.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
+			var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
+
 			for (int a = 0; a < words.Length; a++)
 			{
-				if (words[a] == "class")
+				if (words[a] == "class" && words[a + 1] == fileNameWithoutExtension)
 				{
 					string fullAssemblyName = CompilationPipeline.GetAssemblyNameFromScriptPath(path);
 					string assemblyName = Path.GetFileNameWithoutExtension(fullAssemblyName);
